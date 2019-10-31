@@ -46,11 +46,8 @@ func main() {
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Hello, world")
 	pdf.Ln(-1)
-	for i, d := range dataMap {
+	for _, d := range dataMap {
 		Row(d)
-		if i > 10 {
-			break
-		}
 	}
 	err = pdf.OutputFileAndClose("hello.pdf")
 	if err != nil {
@@ -69,6 +66,7 @@ func Row(data map[string]interface{}) {
 	}
 	nb = Max(lines...)
 	h := float64(5 * nb)
+	CheckPageBreak(h)
 	for i, col := range headers {
 		x := pdf.GetX()
 		y := pdf.GetY()
@@ -95,6 +93,16 @@ func Lines(w float64, str string) int {
 
 	return int(math.Ceil(pdf.GetStringWidth(str) / w))
 
+}
+
+func CheckPageBreak(h float64) {
+	_, ph := pdf.GetPageSize()
+	left, top, _, bottom := pdf.GetMargins()
+
+	if pdf.GetY()+h > ph-bottom {
+		pdf.AddPage()
+		pdf.SetXY(left, top)
+	}
 }
 
 // Headers ignore.
